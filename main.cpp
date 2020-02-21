@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include "geometry.h"
+#include "cmake-build-debug/Objet.h"
+
 using namespace std;
 const int width    = 1024;
 const int height   = 768;
@@ -44,14 +46,12 @@ void line(Vec2i t0, Vec2i t1, Vec3f color, std::vector<Vec3f> &framebuffer) {
         int y = y0*(1.-t) + y1*t;
     }
 }
-
 void triangle(Vec2i t0, Vec2i t1, Vec2i t2,Vec3f color,   std::vector<Vec3f>  &framebuffer) {
     line(t0, t1, color, framebuffer);
     line(t1, t2, color, framebuffer);
     line(t2, t0, color, framebuffer);
 }
-
-    void render() {
+void render() {
     std::vector<Vec3f> framebuffer(width*height);
     //on creait le fond
     for (size_t j = 0; j<height; j++) {
@@ -60,8 +60,9 @@ void triangle(Vec2i t0, Vec2i t1, Vec2i t2,Vec3f color,   std::vector<Vec3f>  &f
         }
     }
     triangle(Vec2i(0,0), Vec2i(0,140), Vec2i(140,140), Vec3f(0,0,255),framebuffer);
-
-             std::ofstream ofs("./out.ppm", std::ios_base::out | std::ios_base::binary); // save the framebuffer to file
+    CObjet objet;
+    objet.chargerObjet("./../diablo3.obj");
+    std::ofstream ofs("./out.ppm", std::ios_base::out | std::ios_base::binary); // save the framebuffer to file
     ofs << "P6\n" << width << " " << height << "\n255\n";
     for (size_t i = 0; i < height*width; ++i) {
         for (size_t j = 0; j<3; j++) {
