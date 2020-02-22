@@ -3,4 +3,4 @@ project(projet)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(projet main.cpp cmake-build-debug/Objet.h)
+add_executable(projet main.cpp Objet.h Objet.cpp)
