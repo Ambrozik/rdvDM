@@ -13,14 +13,60 @@
 
 #endif //PROJET_OBJET_H
 
+
+const int width    = 1024;
+const int height   = 768;
+
 typedef struct CObjet{
 private :
     std::vector<Vec3f> sommets;
     std::vector<Vec3f> norms;
-    std::vector<Vec2f> uv_;
-    std::vector<std::vector<Vec3i> > faces_;
+    std::vector<Vec2f> uv;
+    std::vector<std::vector<Vec3i> > faces;
 
 public :
+
+    void line(Vec2i t0, Vec2i t1, Vec3f color, std::vector<Vec3f> &framebuffer) {
+        bool steep = false;
+        int x0 = t0.x, y0 = t0.y ,x1 = t1.x, y1 = t1.y;
+
+        if (std::abs(x0-x1)<std::abs(y0-y1)) {
+            std::swap(x0, y0);
+            std::swap(x1, y1);
+            steep = true;
+        }
+        if (x0>x1) {
+            std::swap(x0, x1);
+            std::swap(y0, y1);
+        }
+        int dx = x1-x0;
+        int dy = y1-y0;
+        int derror2 = std::abs(dy)*2;
+        int error2 = 0;
+        int y = y0;
+        for (int x=x0; x<=x1; x++) {
+            if (steep) {
+              if(x+y*width <= framebuffer.size()) framebuffer[x+y*width] = color;
+
+            } else {
+                if(y+x*width <= framebuffer.size()) framebuffer[y+x*width] = color;
+            }
+            error2 += derror2;
+            if (error2 > dx) {
+                y += (y1>y0?1:-1);
+                error2 -= dx*2;
+            }
+        }
+        for (int x=x0; x<=x1; x++) {
+            float t = (x-x0)/(float)(x1-x0);
+            int y = y0*(1.-t) + y1*t;
+        }
+    }
+    void triangle(Vec2i t0, Vec2i t1, Vec2i t2,Vec3f color,   std::vector<Vec3f>  &framebuffer) {
+        line(t0, t1, color, framebuffer);
+        line(t1, t2, color, framebuffer);
+        line(t2, t0, color, framebuffer);
+    }
     void chargerObjet(char *filename){
         std::ifstream in;
         in.open (filename, std::ifstream::in);
@@ -42,9 +88,9 @@ public :
                 norms.push_back(n);
             } else if (!line.compare(0, 3, "vt ")) {
                 iss >> trash >> trash;
-                Vec2f uv;
-                for (int i=0;i<2;i++) iss >> uv[i];
-                uv_.push_back(uv);
+                Vec2f u;
+                for (int i=0;i<2;i++) iss >> u[i];
+                uv.push_back(u);
             }  else if (!line.compare(0, 2, "f ")) {
                 std::vector<Vec3i> f;
                 Vec3i tmp;
@@ -53,9 +99,33 @@ public :
                     for (int i=0; i<3; i++) tmp[i]--; // in wavefront obj all indices start at 1, not zero
                     f.push_back(tmp);
                 }
-                faces_.push_back(f);
+                faces.push_back(f);
             }
         }
     }
-    void draw(){}
+    int nbFaces(){
+        return faces.size();
+}
+    //recupurer une face
+    std::vector<int> face(int idx) {
+        std::vector<int> face;
+        for (int i=0; i<(int)faces[idx].size(); i++) face.push_back(faces[idx][i][0]);
+        return face;
+    }
+    //recuperer un sommet
+    Vec3f sommet(int i){
+        return sommets[i];}
+    //dessiner l'objet en ligne
+    void drawline(std::vector<Vec3f> &framebuffer){
+        for(int i = 0 ;  i < nbFaces(); i++){
+            std::vector<int> f = face(i);
+            for (int j=0; j<3; j++) {
+                Vec3f v0 = sommet(f[j]);
+                Vec3f v1 = sommet(f[(j+1)%3]);
+                Vec2i t0 = Vec2i((v0.x+1.)*width/2.,(v0.y+1.)*height/2.);
+                Vec2i t1 = Vec2i((v1.x+1.)*width/2.,(v1.y+1.)*height/2.);
+                line(t0, t1, Vec3f(255,255,255), framebuffer);
+            }
+        }
+    }
 };
