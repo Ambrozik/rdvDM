@@ -15,14 +15,14 @@
 
 
 const int width    = 1024;
-const int height   = 768;
+const int height   = 1000;
 
 typedef struct CObjet{
 private :
     std::vector<Vec3f> sommets;
     std::vector<Vec3f> norms;
     std::vector<Vec2f> uv;
-    std::vector<std::vector<Vec3i> > faces;
+    std::vector<std::vector<Vec3i> > triangles;
 
 public :
 
@@ -46,10 +46,11 @@ public :
         int y = y0;
         for (int x=x0; x<=x1; x++) {
             if (steep) {
-              if(x+y*width <= framebuffer.size()) framebuffer[x+y*width] = color;
+                if(y+x*width <= framebuffer.size()) framebuffer[y+x*width] = color;
+
 
             } else {
-                if(y+x*width <= framebuffer.size()) framebuffer[y+x*width] = color;
+                if(x+y*width <= framebuffer.size()) framebuffer[x+y*width] = color;
             }
             error2 += derror2;
             if (error2 > dx) {
@@ -67,6 +68,7 @@ public :
         line(t1, t2, color, framebuffer);
         line(t2, t0, color, framebuffer);
     }
+    void triangleColorie(){}
     void chargerObjet(char *filename){
         std::ifstream in;
         in.open (filename, std::ifstream::in);
@@ -99,17 +101,17 @@ public :
                     for (int i=0; i<3; i++) tmp[i]--; // in wavefront obj all indices start at 1, not zero
                     f.push_back(tmp);
                 }
-                faces.push_back(f);
+                triangles.push_back(f);
             }
         }
     }
-    int nbFaces(){
-        return faces.size();
+    int nbTriangle(){
+        return triangles.size();
 }
     //recupurer une face
     std::vector<int> face(int idx) {
         std::vector<int> face;
-        for (int i=0; i<(int)faces[idx].size(); i++) face.push_back(faces[idx][i][0]);
+        for (int i=0; i<(int)triangles[idx].size(); i++) face.push_back(triangles[idx][i][0]);
         return face;
     }
     //recuperer un sommet
@@ -117,14 +119,17 @@ public :
         return sommets[i];}
     //dessiner l'objet en ligne
     void drawline(std::vector<Vec3f> &framebuffer){
-        for(int i = 0 ;  i < nbFaces(); i++){
+        for(int i = 0 ;  i < nbTriangle(); i++){
             std::vector<int> f = face(i);
+
             for (int j=0; j<3; j++) {
-                Vec3f v0 = sommet(f[j]);
-                Vec3f v1 = sommet(f[(j+1)%3]);
+                Vec3f v0 = sommet(f[0]);
+                Vec3f v1 = sommet(f[1]);
+                Vec3f v2= sommet(f[2]);
                 Vec2i t0 = Vec2i((v0.x+1.)*width/2.,(v0.y+1.)*height/2.);
                 Vec2i t1 = Vec2i((v1.x+1.)*width/2.,(v1.y+1.)*height/2.);
-                line(t0, t1, Vec3f(255,255,255), framebuffer);
+                Vec2i t2 = Vec2i((v2.x+1.)*width/2.,(v2.y+1.)*height/2.);
+                triangle(t0, t1,t2, Vec3f(255,255,255), framebuffer);
             }
         }
     }
