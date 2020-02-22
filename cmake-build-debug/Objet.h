@@ -118,19 +118,57 @@ public :
     Vec3f sommet(int i){
         return sommets[i];}
     //dessiner l'objet en ligne
-    void drawline(std::vector<Vec3f> &framebuffer){
+    void drawTriangle(std::vector<Vec3f> &framebuffer,bool colorie){
+
         for(int i = 0 ;  i < nbTriangle(); i++){
             std::vector<int> f = face(i);
+            Vec3f v0 = sommet(f[0]);
+            Vec3f v1 = sommet(f[1]);
+            Vec3f v2= sommet(f[2]);
+            Vec2i A = Vec2i((v0.x+1.)*width/2.,(v0.y+1.)*height/2.);
+            Vec2i B = Vec2i((v1.x+1.)*width/2. ,(v1.y+1.)*height/2.);
+            Vec2i C = Vec2i((v2.x+1.)*width/2. ,(v2.y+1.)*height/2.);
+          //  triangle(A, B,C, Vec3f(255,255,255), framebuffer);
+            //tri des 3 points dans l'ordre croissant des lignes
+            if (A.y > B.y)  std::swap(A,B);
+            if (B.y > C.y)  std::swap(B,C);
+            if (A.y > B.y)  std::swap(A,B);
+            //calcule 3vecteurs qu'on parcours
+            Vec2i AB = Vec2i(B.x-A.x,B.y-A.y);
+            Vec2i AC = Vec2i(C.x-A.x,C.y-A.y);
+            Vec2i BC = Vec2i(C.x-B.x,C.y-B.y);
+            //parcours des lignes de v0 a v1
+            Vec2i pAB = Vec2i(0,0);
+            Vec2i pAC = Vec2i(0,0);
 
-            for (int j=0; j<3; j++) {
-                Vec3f v0 = sommet(f[0]);
-                Vec3f v1 = sommet(f[1]);
-                Vec3f v2= sommet(f[2]);
-                Vec2i t0 = Vec2i((v0.x+1.)*width/2.,(v0.y+1.)*height/2.);
-                Vec2i t1 = Vec2i((v1.x+1.)*width/2.,(v1.y+1.)*height/2.);
-                Vec2i t2 = Vec2i((v2.x+1.)*width/2.,(v2.y+1.)*height/2.);
-                triangle(t0, t1,t2, Vec3f(255,255,255), framebuffer);
+            if(AB.y>0){
+                for(int i= 0 ; i < AB.y; i++){
+                    pAB.x = A.x + AB.x * i/AB.y;
+                    pAB.y = A.y + i;
+                    pAC.x = A.x + AC.x * i/AC.y;
+                    pAC.y = pAB.y;
+                    line(pAB,pAC,Vec3f(255,255,255),framebuffer);
+                }
+            }else{
+                line(A,B,Vec3f(255,255,255),framebuffer);
             }
+            Vec2i pBC = Vec2i(0,0);
+            if(BC.y>0){
+                for(int i= AB.y ; i < AC.y; i++){
+                    pBC.x = B.x + BC.x * (i-AB.y)/BC.y;
+                    pBC.y = A.y + i;
+                    pAC.x = A.x + AC.x * i/AC.y;
+                    pAC.y = pBC.y;
+                    line(pBC,pAC,Vec3f(255,255,255),framebuffer);
+                }
+            }else{
+                line(B,C,Vec3f(255,255,255),framebuffer);
+            }
+
+
+
+
         }
     }
+
 };

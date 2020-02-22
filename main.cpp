@@ -17,7 +17,7 @@ void render() {
 
     CObjet objet;
     objet.chargerObjet("./../diablo3.obj");
-    objet.drawline(framebuffer);
+    objet.drawTriangle(framebuffer,false);
     std::ofstream ofs("./out.ppm", std::ios_base::out | std::ios_base::binary); // save the framebuffer to file
     ofs << "P6\n" << width << " " << height << "\n255\n";
     for (size_t i = 0; i < height*width; ++i) {
