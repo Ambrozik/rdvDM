@@ -3,5 +3,6 @@ project(projet)
 
 set(CMAKE_CXX_STANDARD 14)
 set( CMAKE_CXX_FLAGS "-O3 " )
+include_directories(lib/stb)
 
-add_executable(projet main.cpp Objet.h Objet.hpp)
+add_executable(projet main.cpp)

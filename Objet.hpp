@@ -1,7 +1,13 @@
 //
 // Created by huga on 22/02/2020.
 
-inline void Objet::chargerObjet( std::string const& filename){
+inline Objet::Objet( std::string const& filename,std::string const& texture){
+
+    stbi_set_flip_vertically_on_load(1);
+    pixels = stbi_load(texture.c_str(), &widthTexture, &heightTexture, &bytesperpixels, 3);
+    if (!pixels) {
+        std::cerr << stbi_failure_reason() << std::endl;
+    }
 std::ifstream in;
 in.open (filename, std::ifstream::in);
 if (in.fail()) return;
@@ -37,6 +43,15 @@ while (!in.eof()) {
     }
 }
 }
+inline Objet::~Objet() {
+    stbi_image_free(pixels);
+}
+inline Vec3f Objet::get_pixels(Vec2f const& uv) const {
+    int x = static_cast <int> (uv.x * static_cast <double> (widthTexture));
+    int y = static_cast <int> (uv.y * static_cast <double> (heightTexture));
+    int index = (x + y * width) * bytesperpixels;
+    return Vec3f(pixels[index], pixels[index + 1], pixels[index + 2]) / 255.0f;
+};
 inline int Objet::nbTriangle() const{
 return triangles.size();
 }
@@ -50,8 +65,16 @@ inline std::vector<int> Objet::faceNormales(int idx) const {
     for (int i=0; i<(int)triangles[idx].size(); i++) face.push_back(triangles[idx][i][2]);
     return face;
 }
+inline std::vector<int> Objet::faceUV(int idx) const {
+    std::vector<int> face;
+    for (int i=0; i<(int)triangles[idx].size(); i++) face.push_back(triangles[idx][i][1]);
+    return face;
+}
 inline Vec3f Objet::sommet(int i) const {
     return sommets[i];}
 inline Vec3f Objet::norm(int i) const {
     return norms[i];
+}
+inline Vec2f Objet::get_uv(int i) const {
+    return uv[i];
 }

@@ -90,6 +90,15 @@ private :
             ns.emplace_back(n1);
             ns.emplace_back(n2);
 
+            std::vector<int> uv = o.faceUV(i);
+            Vec2f uv0 = o.get_uv(uv[0]);
+            Vec2f uv1 = o.get_uv(uv[1]);
+            Vec2f uv2 = o.get_uv(uv[2]);
+            std::vector<Vec2f> uvs;
+            uvs.emplace_back(uv0);
+            uvs.emplace_back(uv1);
+            uvs.emplace_back(uv2);
+
             Vec2f bboxmin = Vec2f(numeric_limits<float>::max(),numeric_limits<float>::max());
             Vec2f bboxmax = Vec2f(-numeric_limits<float>::max(),-numeric_limits<float>::max());
             Vec2f clamp = Vec2f(width-1, height-1);
@@ -107,14 +116,17 @@ private :
                     if (bc_screen.x<0 || bc_screen.y<0 || bc_screen.z<0) continue;
                     currentPixel.z = 0;
                     Vec3f normal(0, 0, 0);
+                    Vec2f texturePixel(0,0);
                     for (int i=0; i<3; i++) currentPixel.z += vs[i][2]*bc_screen[i];
                     for (int i=0; i<3; i++) normal = normal + ns[i]*bc_screen[i];
+                    for (int i=0; i<3; i++) texturePixel = texturePixel + uvs[i]*bc_screen[i];
+                    normal = normal.normalize();
 
                     float intensity = fabs(normal * lumiere);
                     if(intensity>0) {
                         if (zbuffer[int(currentPixel.x + currentPixel.y * width)] < currentPixel.z) {
                             zbuffer[int(currentPixel.x + currentPixel.y * width)] = currentPixel.z;
-                            framebuffer[int(currentPixel.x + (height - 1 - currentPixel.y) * width)] = Vec3f(intensity * normal.x, intensity * normal.y, intensity * normal.z);
+                            framebuffer[int(currentPixel.x + (height - 1 - currentPixel.y) * width)] = o.get_pixels(texturePixel) * intensity;
                         }
                     }
                 }
@@ -131,8 +143,7 @@ public :
                 zbuffer[i+j*width] = -std::numeric_limits<int>::max();
             }
         }
-        Objet objet;
-        objet.chargerObjet("./../african_head.obj");
+        Objet objet("./../african_head.obj","./../african_head_diffuse.tga");
         drawTriangle(objet);
         std::ofstream ofs("./out.ppm", std::ios_base::out | std::ios_base::binary); // save the framebuffer to file
         ofs << "P6\n" << width << " " << height << "\n255\n";
