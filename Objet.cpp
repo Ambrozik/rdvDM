@@ -6,6 +6,7 @@
 #include "Objet.h"
 
 void Objet::line(Vec2i t0, Vec2i t1, Vec3f color, std::vector<Vec3f> &framebuffer) {
+
     bool steep = false;
     int x0 = t0.x, y0 = t0.y ,x1 = t1.x, y1 = t1.y;
     if (std::abs(x0-x1)<std::abs(y0-y1)) {
@@ -24,11 +25,9 @@ void Objet::line(Vec2i t0, Vec2i t1, Vec3f color, std::vector<Vec3f> &framebuffe
     int y = y0;
     for (int x=x0; x<=x1; x++) {
         if (steep) {
-            if(y+x*width <= framebuffer.size()) framebuffer[y+x*width] = color;
-
-
+            if((height-1-y)+x*width <= framebuffer.size()) framebuffer[(height-1-y)+x*width] = color;
         } else {
-            if(x+y*width <= framebuffer.size()) framebuffer[x+y*width] = color;
+            if(x+(height-1-y)*width <= framebuffer.size()) framebuffer[x+(height-1-y)*width] = color;
         }
         error2 += derror2;
         if (error2 > dx) {
@@ -46,7 +45,7 @@ void Objet::triangle(Vec2i t0, Vec2i t1, Vec2i t2,Vec3f color,   std::vector<Vec
     line(t1, t2, color, framebuffer);
     line(t2, t0, color, framebuffer);
 }
-void Objet::chargerObjet(char *filename){
+void Objet::chargerObjet( std::string const& filename){
 std::ifstream in;
 in.open (filename, std::ifstream::in);
 if (in.fail()) return;
@@ -91,53 +90,61 @@ for (int i=0; i<(int)triangles[idx].size(); i++) face.push_back(triangles[idx][i
 return face;
 }
 Vec3f Objet::sommet(int i){
-return sommets[i];}
-void Objet::drawTriangle(std::vector<Vec3f> &framebuffer){
-for(int i = 0 ;  i < nbTriangle(); i++){
-
-    Vec3f colorie = Vec3f( (rand()%255)/255.,(rand()%255)/255.,(rand()%255)/255. ) ;
-
-    std::vector<int> f = face(i);
-    Vec3f v0 = sommet(f[0]);
-    Vec3f v1 = sommet(f[1]);
-    Vec3f v2= sommet(f[2]);
-    Vec2i A = Vec2i((v0.x+1.)*width/2.,(v0.y+1.)*height/2.);
-    Vec2i B = Vec2i((v1.x+1.)*width/2. ,(v1.y+1.)*height/2.);
-    Vec2i C = Vec2i((v2.x+1.)*width/2. ,(v2.y+1.)*height/2.);
-    //tri des 3 points dans l'ordre croissant des lignes
-    if (A.y > B.y)  std::swap(A,B);
-    if (B.y > C.y)  std::swap(B,C);
-    if (A.y > B.y)  std::swap(A,B);
-    //calcule 3vecteurs qu'on parcours
-    Vec2i AB = Vec2i(B.x-A.x,B.y-A.y);
-    Vec2i AC = Vec2i(C.x-A.x,C.y-A.y);
-    Vec2i BC = Vec2i(C.x-B.x,C.y-B.y);
-    //parcours des lignes de v0 a v1
-    Vec2i pAB = Vec2i(0,0);
-    Vec2i pAC = Vec2i(0,0);
-
-    if(AB.y>0){
-        for(int i= 0 ; i < AB.y; i++){
-            pAB.x = A.x + AB.x * i/AB.y;
-            pAB.y = A.y + i;
-            pAC.x = A.x + AC.x * i/AC.y;
-            pAC.y = pAB.y;
-            line(pAB,pAC,colorie,framebuffer);
-        }
-    }else{
-        line(A,B,colorie,framebuffer);
-    }
-    Vec2i pBC = Vec2i(0,0);
-    if(BC.y>0){
-        for(int i= AB.y ; i < AC.y; i++){
-            pBC.x = B.x + BC.x * (i-AB.y)/BC.y;
-            pBC.y = A.y + i;
-            pAC.x = A.x + AC.x * i/AC.y;
-            pAC.y = pBC.y;
-            line(pBC,pAC,colorie,framebuffer);
-        }
-    }else{
-        line(B,C,colorie,framebuffer);
-    }
+    return sommets[i];}
+Vec3f Objet::norm(int i) {
+    return norms[i];
 }
+void Objet::drawTriangle(std::vector<Vec3f> &framebuffer){
+    Vec3f  lumiere = Vec3f(0,0,1);
+    for(int i = 0 ;  i < nbTriangle(); i++) {
+        std::vector<int> f = face(i);
+        Vec3f v0 = sommet(f[0]);
+        Vec3f v1 = sommet(f[1]);
+        Vec3f v2 = sommet(f[2]);
+        Vec3f n = (v2-v0)^(v1-v0);
+        n.normalize();
+        float intensity = fabs(n * lumiere);
+        if (intensity > 0) {
+            Vec3f colorie = Vec3f(intensity, intensity, intensity);
+
+            Vec2i A = Vec2i((v0.x + 1.) * width / 2., (v0.y + 1.) * height / 2.);
+            Vec2i B = Vec2i((v1.x + 1.) * width / 2., (v1.y + 1.) * height / 2.);
+            Vec2i C = Vec2i((v2.x + 1.) * width / 2., (v2.y + 1.) * height / 2.);
+            //tri des 3 points dans l'ordre croissant des lignes
+            if (A.y > B.y) std::swap(A, B);
+            if (B.y > C.y) std::swap(B, C);
+            if (A.y > B.y) std::swap(A, B);
+            //calcule 3vecteurs qu'on parcours
+            Vec2i AB = Vec2i(B.x - A.x, B.y - A.y);
+            Vec2i AC = Vec2i(C.x - A.x, C.y - A.y);
+            Vec2i BC = Vec2i(C.x - B.x, C.y - B.y);
+            //parcours des lignes de v0 a v1
+            Vec2i pAB = Vec2i(0, 0);
+            Vec2i pAC = Vec2i(0, 0);
+
+            if (AB.y > 0) {
+                for (int i = 0; i < AB.y; i++) {
+                    pAB.x = A.x + AB.x * i / AB.y;
+                    pAB.y = A.y + i;
+                    pAC.x = A.x + AC.x * i / AC.y;
+                    pAC.y = pAB.y;
+                    line(pAB, pAC, colorie, framebuffer);
+                }
+            } else {
+                line(A, B, colorie, framebuffer);
+            }
+            Vec2i pBC = Vec2i(0, 0);
+            if (BC.y > 0) {
+                for (int i = AB.y; i < AC.y; i++) {
+                    pBC.x = B.x + BC.x * (i - AB.y) / BC.y;
+                    pBC.y = A.y + i;
+                    pAC.x = A.x + AC.x * i / AC.y;
+                    pAC.y = pBC.y;
+                    line(pBC, pAC, colorie, framebuffer);
+                }
+            } else {
+                line(B, C, colorie, framebuffer);
+            }
+        }
+    }
 }

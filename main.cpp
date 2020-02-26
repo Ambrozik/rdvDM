@@ -2,9 +2,9 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
-#include "geometry.h"
 #include "Objet.h"
 
+using namespace std;
 
 void render() {
     const int width    = 1024;
@@ -17,7 +17,7 @@ void render() {
         }
     }
     Objet objet;
-    objet.chargerObjet("./../diablo3.obj");
+    objet.chargerObjet("./../african_head.obj");
     objet.drawTriangle(framebuffer);
     std::ofstream ofs("./out.ppm", std::ios_base::out | std::ios_base::binary); // save the framebuffer to file
     ofs << "P6\n" << width << " " << height << "\n255\n";

@@ -27,9 +27,10 @@ private :
 public :
     void line(Vec2i t0, Vec2i t1, Vec3f color, std::vector<Vec3f> &framebuffer);
     void triangle(Vec2i t0, Vec2i t1, Vec2i t2,Vec3f color,   std::vector<Vec3f>  &framebuffer);
-    void chargerObjet(char *filename);
+    void chargerObjet(std::string const& filename);
     int nbTriangle();
     Vec3f sommet(int i);
+    Vec3f norm(int i);
     std::vector<int> face(int idx);
     void drawTriangle(std::vector<Vec3f> &framebuffer);
 };

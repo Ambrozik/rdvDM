@@ -33,6 +33,8 @@ template <typename T> struct vec<3,T> {
     vec() : x(T()), y(T()), z(T()) {}
     vec(T X, T Y, T Z) : x(X), y(Y), z(Z) {}
     template <class U> vec<3,T>(const vec<3,U> &v);
+
+    inline vec<3, T> operator ^(const vec<3, T> &v) const { return vec<3, T>(y*v.z-z*v.y, z*v.x-x*v.z, x*v.y-y*v.x); }
     T& operator[](const size_t i)       { assert(i<3); return i<=0 ? x : (1==i ? y : z); }
     const T& operator[](const size_t i) const { assert(i<3); return i<=0 ? x : (1==i ? y : z); }
     float norm() { return std::sqrt(x*x+y*y+z*z); }
@@ -218,4 +220,3 @@ typedef vec<3,  int>   Vec3i;
 typedef vec<4,  float> Vec4f;
 typedef mat<4,4,float> Matrix;
 #endif //__GEOMETRY_H__
-
