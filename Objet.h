@@ -24,13 +24,14 @@ private :
     std::vector<Vec2f> uv;
     std::vector<std::vector<Vec3i> > triangles;
 
+
 public :
-    void line(Vec2i t0, Vec2i t1, Vec3f color, std::vector<Vec3f> &framebuffer);
-    void triangle(Vec2i t0, Vec2i t1, Vec2i t2,Vec3f color,   std::vector<Vec3f>  &framebuffer);
     void chargerObjet(std::string const& filename);
-    int nbTriangle();
-    Vec3f sommet(int i);
-    Vec3f norm(int i);
-    std::vector<int> face(int idx);
-    void drawTriangle(std::vector<Vec3f> &framebuffer);
+    int nbTriangle() const;
+    Vec3f sommet(int i) const;
+    Vec3f norm(int i) const;
+    std::vector<int> faceVertices(int idx) const;
+    std::vector<int> faceNormales(int idx) const ;
 };
+
+#include "Objet.hpp"
