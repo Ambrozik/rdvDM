@@ -16,8 +16,6 @@
 #include <stb_image.h>
 class Objet{
 private :
-    int width    = 1024;
-    int height   = 768;
     std::vector<Vec3f> sommets;
     std::vector<Vec3f> norms;
     std::vector<Vec2f> uv;
