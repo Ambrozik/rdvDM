@@ -2,7 +2,6 @@
 #include <cmath>
 #include <functional>
 #include <iostream>
-#include <fstream>
 #include "Objet.h"
 
 using namespace std;
@@ -162,7 +161,7 @@ private :
         lumiere = lumiere.normalize();
         Matrix Projection = Matrix::identity();
         Projection[3][2] = -1.f/dist ;
-        Matrix camera1 = lookat(Vec3f(0,0,dist),Vec3f(0,0,0),Vec3f(0,1,0));
+        //  Matrix camera1 = lookat(Vec3f(0,0,dist),Vec3f(0,0,0),Vec3f(0,1,0));
         Matrix cameraL = lookat(Vec3f(0,0,dist) + Vec3f(0.1,0,0),Vec3f(0,0,0),Vec3f(0,1,0));
         Matrix cameraR = lookat(Vec3f(0,0,dist) - Vec3f(0.1,0,0),Vec3f(0,0,0),Vec3f(0,1,0));
         blue = false; green = false; red = true;
@@ -174,7 +173,6 @@ private :
         };
         blue = true ; green = true; red = false;
         drawCamera(cameraR,o,lumiere,Projection);
-
     }
 public :
     void render() {
@@ -201,6 +199,5 @@ public :
 int main() {
     Renderer r;
     r.render();
-
     return 0;
 }
